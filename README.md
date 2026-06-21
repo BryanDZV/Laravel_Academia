@@ -1,67 +1,57 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Proyecto Laravel - Gestión de Academia
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este es un proyecto desarrollado con Laravel 10 (PHP 8.1+) que sirve como sistema de gestión para una academia. A continuación, se detalla todo el trabajo realizado en este proyecto.
 
-## About Laravel
+## Arquitectura y Estructura del Proyecto
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Modelos y Migraciones
+Se han diseñado e implementado las siguientes tablas en la base de datos usando migraciones de Laravel:
+*   **Usuarios (`users`)**: Sistema de autenticación adaptado. Campos: `login` (único), `nombre`, `apellidos`, `dni` (único), `password`, `rol` (enum: 'admin', 'profesor').
+*   **Alumnos (`alumnos`)**: Gestión del alumnado. Campos: `nombre`, `apellidos`, `email` (único), `nivel` (enum: 'basico', 'intermedio', 'avanzado'), `es_becado` (boolean).
+*   **Clases (`clases`)** y **Pagos (`pagos`)**: Migraciones preparadas para extender las funcionalidades de la plataforma.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. Autenticación y Autorización
+*   **Login Customizado**: Se implementó un controlador personalizado (`LoginControllerForm`) para manejar el inicio y cierre de sesión de los usuarios de la plataforma.
+*   **Middleware Personalizado (`CheckRole`)**: Se ha creado un middleware robusto que verifica los roles del usuario logueado. Usa el operador `...` (variadic) para admitir múltiples roles por ruta, protegiendo las secciones de la aplicación de manera eficiente.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Enrutamiento (Routing)
+Se estructuraron las rutas (`routes/web.php`) de manera segura utilizando grupos y middlewares:
+*   **Rutas Públicas (Guest)**: `GET /` y `POST /login` para el acceso al sistema.
+*   **Rutas Privadas (Auth)**:
+    *   Cierre de sesión seguro.
+    *   **Grupo 'admin,profesor'**: Acceso de lectura al listado de alumnos (`alumnos.index`).
+    *   **Grupo 'admin'**: Acceso total mediante `Route::resource` al controlador de alumnos (crear, editar, eliminar), exceptuando el index para evitar duplicidad de URIs.
 
-## Learning Laravel
+### 4. Controladores (Controllers)
+*   **`AlumnoController`**: Controlador de tipo resource. Funcionalidades incluidas:
+    *   Listado con **Paginación** (5 elementos por página).
+    *   **Validaciones Robustas (`Request validate`)**: Inclusión de reglas como `Rule::in` para validación de campos Enum (niveles), validaciones `unique` dinámicas para el email que ignoran el ID actual en el método `update`, y manejo lógico de checkboxes para campos booleanos (`es_becado`).
+    *   Manejo completo del CRUD (Create, Read, Update, Delete) enfocado en seguridad y optimización.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 5. Vistas (Views)
+Utilizando el motor de plantillas **Blade**, se desarrollaron:
+*   **Layout base (`layout.blade.php`)**: Estructura de diseño reutilizable.
+*   **Vistas de Auth**: Formulario de inicio de sesión (`login.blade.php`).
+*   **Vistas de Alumnos**:
+    *   `index.blade.php`: Listado de alumnos con botones de acción condicionados por el rol del usuario (solo el administrador ve los botones de crear, editar y eliminar).
+    *   `create.blade.php` / `edit.blade.php`: Formularios con manejo de errores de validación y persistencia de datos antiguos (`old()`) para mejorar la Experiencia de Usuario (UX).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 6. Bases de datos (Seeders & Factories)
+Se implementó un entorno de prueba realista automatizado (`DatabaseSeeder.php`):
+*   **Creación manual de Administrador Root**: Usuario fijo `admin/admin` para garantizar siempre el acceso al sistema.
+*   **Generación de Profesores**: Generación masiva automatizada de cuentas de profesor.
+*   **`AlumnoFactory`**: Implementación del patrón Factory (`Alumno::factory(15)->create()`) utilizando FakerPHP para popular la base de datos con decenas de registros realistas de manera instantánea, fundamental para realizar pruebas de paginación e interfaz de usuario.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tecnologías y Herramientas Destacadas
+*   **Framework:** Laravel 10.10
+*   **Lenguaje:** PHP 8.1+
+*   **Base de datos:** Soportada por el ORM Eloquent y Query Builder de Laravel.
+*   **Frontend:** Blade Templating, CSS/JS a través de Vite (`vite.config.js`).
 
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# Laravel_Academia" 
+## Cómo levantar este proyecto
+1. Instalar dependencias de PHP: `composer install`
+2. Instalar dependencias de Node (opcional si usas Vite): `npm install`
+3. Copiar archivo de entorno: `cp .env.example .env`
+4. Generar App Key de cifrado: `php artisan key:generate`
+5. Ejecutar migraciones y seeders para generar la BD: `php artisan migrate --seed`
+6. Levantar servidor local: `php artisan serve` y `npm run dev` (para compilar assets).
