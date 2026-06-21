@@ -1,7 +1,6 @@
 # Proyecto Laravel - Gestión de Academia
 
-Este es un proyecto desarrollado con Laravel 10 (PHP 8.1+) que sirve como sistema de gestión para una academia. A continuación, se detalla todo el trabajo realizado en este proyecto.
-
+Este es un proyecto desarrollado con Laravel 10 (PHP 8.1+).Sistema de gestión basado en roles (RBAC). Destaca la implementación de autenticación customizada, middlewares variadic para control de acceso granular, validaciones complejas en formularios y automatización de base de datos con Factories y Seeders.
 ## Arquitectura y Estructura del Proyecto
 
 ### 1. Modelos y Migraciones
