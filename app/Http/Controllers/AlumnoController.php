@@ -14,7 +14,7 @@ class AlumnoController extends Controller
     public function index()
     {
         //mostrar tabla con todos los alumnos
-        $alumnos = Alumno::all();
+        $alumnos = Alumno::paginate(5); // Paginación de 5 alumnos por página
         return view('alumnos.index', compact('alumnos'));
     }
 
@@ -56,7 +56,7 @@ class AlumnoController extends Controller
      */
     public function show(Alumno $alumno)
     {
-        //mostrar 
+        //mostrar
     }
 
     /**

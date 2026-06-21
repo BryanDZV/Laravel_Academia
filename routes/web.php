@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlumnoController;
 use App\Http\Controllers\LoginControllerForm;
+// Eliminar import no usado de ProfesorController
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,19 +18,22 @@ use Illuminate\Support\Facades\Route;
 
 
 // Rutas públicas (Huéspedes)
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginControllerForm::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginControllerForm::class, 'login'])->name('login.post');
-});
+Route::get('/', [LoginControllerForm::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginControllerForm::class, 'login'])->name('login.post');
 
 // Rutas privadas (Autenticados)
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('index');
-    })->name('inicio');
-
     Route::post('/logout', [LoginControllerForm::class, 'logout'])->name('logout');
 
-    //primer parametro plural del modelo, segundo parametro el controlador
-    Route::resource('alumnos', AlumnoController::class);
+    // Rutas compartidas (Profesor y Admin)
+    Route::middleware('role:admin,profesor')->group(function () {
+        // Solo extraemos el index, que ambos pueden ver
+        Route::get('/alumnos', [AlumnoController::class, 'index'])->name('alumnos.index');
+    });
+
+    // Rutas exclusivas para administradores
+    Route::middleware('role:admin')->group(function () {
+        // Excluimos el 'index' para no duplicar la URI ni el nombre de ruta
+        Route::resource('alumnos', AlumnoController::class)->except(['index']);
+    });
 });

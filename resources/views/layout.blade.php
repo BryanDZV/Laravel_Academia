@@ -13,12 +13,24 @@
         <div class="container">
             <a class="navbar-brand" href="{{ route('alumnos.index') }}">Academia</a>
             <div class="navbar-nav">
-                <a class="nav-link" href="{{ route('alumnos.index') }}">Listado</a>
-                <a class="nav-link" href="{{ route('alumnos.create') }}">Crear</a>
+                @auth
+                    @if(auth()->user()->rol === 'administrador')
+                        <a class="nav-link" href="{{ route('admin.panel') }}">Admin</a>
+                    @elseif(auth()->user()->rol === 'profesor')
+                        <a class="nav-link" href="{{ route('alumnos.index') }}">Alumnos</a>
+                    @elseif(auth()->user()->rol === 'alumno')
+                        <a class="nav-link" href="{{ route('alumnos.index') }}">Alumnos</a>
+                    @endif
+                @endauth
             </div>
+
             <div class="navbar-nav ms-auto">
-                <form action="{{ route('logout') }}" method="POST">@csrf<button
-                        class="btn btn-outline-light btn-sm">Salir</button></form>
+                @auth
+                    <span class="navbar-text text-white me-2">{{ auth()->user()->nombre }}</span>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">@csrf
+                        <button class="btn btn-outline-light btn-sm">Salir</button>
+                    </form>
+                @endauth
             </div>
         </div>
     </nav>
@@ -29,5 +41,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 
 </html>
